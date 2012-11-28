@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.3
 
 ## GENERATED FILE - DO NOT EDIT
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import sys
 import os
 
@@ -16,36 +16,36 @@ def getServerStatus():
     host = os.environ.get("host", "127.0.0.1")
     port = 28017
     url = "http://%s:%d/_status" % (host, port)
-    req = urllib2.Request(url)
+    req = urllib.request.Request(url)
     user = os.environ.get("user")
     password = os.environ.get("password")
     if user and password:
-        passwdmngr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passwdmngr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
         passwdmngr.add_password(None, 'http://%s:%d' % (host, port), user, password)
-        authhandler = urllib2.HTTPDigestAuthHandler(passwdmngr)
-        opener = urllib2.build_opener(authhandler)
-        urllib2.install_opener(opener)
-    raw = urllib2.urlopen(req).read()
-    return json.loads( raw )["serverStatus"]
+        authhandler = urllib.request.HTTPDigestAuthHandler(passwdmngr)
+        opener = urllib.request.build_opener(authhandler)
+        urllib.request.install_opener(opener)
+    raw = urllib.request.urlopen(req).read()
+    return json.loads( raw.decode('utf-8') )["serverStatus"]
 
 def ok(s):
     return s == "resident" or s == "virtual" or s == "mapped"
 
 def doData():
-    for k,v in getServerStatus()["mem"].iteritems():
+    for k,v in getServerStatus()["mem"].items():
         if ok(k):
-            print( str(k) + ".value " + str(v * 1024 * 1024) )
+            print(( str(k) + ".value " + str(v * 1024 * 1024) ))
 
 def doConfig():
 
-    print "graph_title MongoDB memory usage"
-    print "graph_args --base 1024 -l 0 --vertical-label Bytes"
-    print "graph_category MongoDB"
+    print("graph_title MongoDB memory usage")
+    print("graph_args --base 1024 -l 0 --vertical-label Bytes")
+    print("graph_category MongoDB")
 
     for k in getServerStatus()["mem"]:
         if ok( k ):
-            print k + ".label " + k
-            print k + ".draw LINE1"
+            print(k + ".label " + k)
+            print(k + ".draw LINE1")
 
 
 
